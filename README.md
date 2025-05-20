@@ -212,6 +212,13 @@ KI/
 
 ---
 
+### ✅ GPU acceleration with CUDA (llama-server on RTX 4060)
+
+Once the server is running, you should see active GPU memory usage via `nvidia-smi`:
+
+![nvidia-smi](screenshots/nvidia-smi_llama_server_running.png)
+
+
 ## 🤝 Contributing
 
 Contributions and suggestions are welcome! Please open an issue or submit a pull request.
