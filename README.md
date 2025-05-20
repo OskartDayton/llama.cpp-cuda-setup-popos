@@ -216,7 +216,7 @@ KI/
 
 Once the server is running, you should see active GPU memory usage via `nvidia-smi`:
 
-![nvidia-smi](screenshots/nvidia-smi_llama_server_running.png)
+![nvidia-smi](nvidia-smi_llama_server_running.png)
 
 
 ## 🤝 Contributing
