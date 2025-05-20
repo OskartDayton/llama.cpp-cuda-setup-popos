@@ -1,6 +1,6 @@
 # llama.cpp-cuda-setup-popos
 
-🦠 **A complete real-world setup guide for running [llama.cpp](https://github.com/ggerganov/llama.cpp) with CUDA support on Pop!_OS (RTX 4060). Includes troubleshooting, performance tips, and integration with SillyTavern.**
+**A complete real-world setup guide for running [llama.cpp](https://github.com/ggerganov/llama.cpp) with CUDA support on Pop!_OS (RTX 4060). Includes troubleshooting, performance tips, and integration with SillyTavern.**
 This project helped me switch to Linux after a Windows crash. Now I’ll never go back.
 
 
@@ -40,7 +40,7 @@ This project helped me switch to Linux after a Windows crash. Now I’ll never g
 
 ---
 
-## 📦 Prerequisites
+## Prerequisites
 
 - Pop!_OS 22.04 (or compatible Ubuntu-based OS)
 - NVIDIA drivers (tested with 570.133.07)
@@ -56,7 +56,7 @@ sudo apt install gcc-12 g++-12
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 For experienced users, here’s the essential setup:
 
@@ -79,15 +79,15 @@ make -j8
 
 ## 🧑‍🔧 Detailed Troubleshooting
 
-### ❌ Problem 1: llama.cpp compiled without CUDA
+### Problem 1: llama.cpp compiled without CUDA
 - **Result:** All computation was done on CPU.
 - **Fix:** Recompile with `-DLLAMA_CUDA=on`.
 
-### ❌ Problem 2: CMake used wrong compiler (GCC 11)
+### Problem 2: CMake used wrong compiler (GCC 11)
 - **Error:** `parameter packs not expanded with ‘...’`
 - **Fix:** Use gcc-12/g++-12.
 
-### ❌ Problem 3: CUDA `.cu` files compiled with `g++`
+### Problem 3: CUDA `.cu` files compiled with `g++`
 - **Fix:** Set `CUDACXX`:
   ```bash
   export CUDACXX=/usr/local/cuda/bin/nvcc
@@ -95,7 +95,7 @@ make -j8
 
 ---
 
-## ✅ Working Build Commands
+## Working Build Commands
 
 ```bash
 export PATH=/usr/local/cuda/bin:$PATH
@@ -113,7 +113,7 @@ make -j8
 
 ---
 
-## ⚙️ Runtime Environment (in `start_llama_server.sh`)
+## Runtime Environment (in `start_llama_server.sh`)
 
 ```bash
 export PATH=/usr/local/cuda/bin:$PATH
@@ -125,12 +125,12 @@ export CUDACXX=/usr/local/cuda/bin/nvcc
 
 ---
 
-## 🧠 Memory Management
+## Memory Management
 
-### ❌ Problem: `cudaMalloc failed: out of memory`
+### Problem: `cudaMalloc failed: out of memory`
 - RTX 4060 (8 GB VRAM) cannot load all layers.
 
-### ✅ Fix: Limit GPU layers
+### Fix: Limit GPU layers
 ```bash
 -ngl 20
 ```
@@ -138,14 +138,14 @@ Test incrementally (e.g., `-ngl 24`, etc.).
 
 ---
 
-## 📦 Model Used
+## Model Used
 
 - `mythomax-l2-13b.Q5_K_M.gguf` from [TheBloke on Hugging Face](https://huggingface.co/TheBloke)
 - Place in: `~/KI/modelle/`
 
 ---
 
-## 🧪 Testing the Server
+## Testing the Server
 
 ```bash
 curl http://localhost:11434/v1/completions \
@@ -160,11 +160,11 @@ curl http://localhost:11434/v1/completions \
 
 ---
 
-## 💬 SillyTavern Integration
+## SillyTavern Integration
 
-### ❌ Problem: llama.cpp mode → no connection
+### Problem: llama.cpp mode → no connection
 
-### ✅ Fix:
+### Fix:
 - **API Type:** OpenAI
 - **API Key:** Any dummy (`sk-test`)
 - **API URL:** `http://localhost:11434/v1` (no `/completions` at end)
@@ -172,7 +172,7 @@ curl http://localhost:11434/v1/completions \
 
 ---
 
-## 🧑‍💻 Bonus: Custom Python CLI
+## Bonus: Custom Python CLI
 
 File: `mythomax_terminal.py`  
 Uses `llama-cpp-python` to prompt interactively from terminal with CUDA.
@@ -188,7 +188,7 @@ llm = Llama(
 
 ---
 
-## 📁 Suggested Structure
+## Suggested Structure
 
 ```
 KI/
@@ -203,7 +203,7 @@ KI/
 
 ---
 
-## ✅ Result
+## Result
 
 - Fully working llama.cpp server with GPU acceleration.
 - API available locally for SillyTavern or curl.
@@ -212,20 +212,20 @@ KI/
 
 ---
 
-### ✅ GPU acceleration with CUDA (llama-server on RTX 4060)
+### CPU acceleration with CUDA (llama-server on RTX 4060)
 
 Once the server is running, you should see active GPU memory usage via `nvidia-smi`:
 
 ![nvidia-smi](nvidia-smi_llama_server_running.png)
 
 
-## 🤝 Contributing
+## Contributing
 
 Contributions and suggestions are welcome! Please open an issue or submit a pull request.
 
 ---
 
-## 📄 License
+## License
 
 MIT – free to use, adapt, share.
 
