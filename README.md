@@ -1,41 +1,92 @@
 # llama.cpp-cuda-setup-popos
 
-🧠 A complete real-world setup guide for running [llama.cpp](https://github.com/ggerganov/llama.cpp) with **CUDA support** on Pop!_OS, including deep debugging notes, build failures, fixes, and full SillyTavern integration.
+🦠 **A complete real-world setup guide for running [llama.cpp](https://github.com/ggerganov/llama.cpp) with CUDA support on Pop!_OS (RTX 4060). Includes troubleshooting, performance tips, and integration with SillyTavern.**
 
 ---
 
-## 🔧 System Specs (Real Hardware)
+## Table of Contents
 
-- OS: Pop!_OS 22.04 LTS (GNOME 42.9, X11)
-- GPU: NVIDIA RTX 4060 Laptop GPU (8 GB VRAM)
-- CPU: AMD Ryzen 7 8845HS (16 threads)
-- RAM: 32 GB
-- CUDA:
+- [System Specs](#-system-specs-real-hardware)
+- [Prerequisites](#-prerequisites)
+- [Quick Start](#-quick-start)
+- [Detailed Troubleshooting](#-detailed-troubleshooting)
+- [Build Commands](#-working-build-commands)
+- [Runtime Environment](#-runtime-environment-in-start_llama_serversh)
+- [Memory Management](#-memory-management)
+- [Model Used](#-model-used)
+- [Testing the Server](#-testing-the-server)
+- [SillyTavern Integration](#-sillytavern-integration)
+- [Bonus: Custom Python CLI](#-bonus-custom-python-cli)
+- [Suggested Directory Structure](#-suggested-structure)
+- [Result](#-result)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## 🛠️ System Specs (Real Hardware)
+
+- **OS:** Pop!_OS 22.04 LTS (GNOME 42.9, X11)
+- **GPU:** NVIDIA RTX 4060 Laptop GPU (8 GB VRAM)
+- **CPU:** AMD Ryzen 7 8845HS (16 threads)
+- **RAM:** 32 GB
+- **CUDA:**
   - Runtime: 12.8 (`nvidia-smi`)
-  - Toolkit: initially 11.5, later toolchain adapted to 12.x
-- GPU Driver: 570.133.07
-- Python 3.10 in venv
+  - Toolkit: Initially 11.5, later toolchain adapted to 12.x
+- **GPU Driver:** 570.133.07
+- **Python:** 3.10 (in venv)
 
 ---
 
-## 🧱 What I Tried First (and Why It Failed)
+## 📦 Prerequisites
+
+- Pop!_OS 22.04 (or compatible Ubuntu-based OS)
+- NVIDIA drivers (tested with 570.133.07)
+- CUDA Toolkit 12.x
+- Python 3.10+
+- CMake
+- gcc-12 and g++-12
+
+Install compilers if needed:
+```bash
+sudo apt install gcc-12 g++-12
+```
+
+---
+
+## 🚀 Quick Start
+
+For experienced users, here’s the essential setup:
+
+```bash
+export PATH=/usr/local/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+export CUDA_HOME=/usr/local/cuda
+export CUDACXX=/usr/local/cuda/bin/nvcc
+
+cmake .. \
+  -DLLAMA_CUDA=on \
+  -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc \
+  -DCMAKE_C_COMPILER=/usr/bin/gcc-12 \
+  -DCMAKE_CXX_COMPILER=/usr/bin/g++-12
+
+make -j8
+```
+
+---
+
+## 🧑‍🔧 Detailed Troubleshooting
 
 ### ❌ Problem 1: llama.cpp compiled without CUDA
-
-- Result: All computation was done on CPU.
-- Fix: Recompiled with `-DLLAMA_CUDA=on`
+- **Result:** All computation was done on CPU.
+- **Fix:** Recompile with `-DLLAMA_CUDA=on`.
 
 ### ❌ Problem 2: CMake used wrong compiler (GCC 11)
-
-- Error: `parameter packs not expanded with ‘...’`
-- Fix: Installed `gcc-12` and `g++-12`:
-  ```bash
-  sudo apt install gcc-12 g++-12
-  ```
+- **Error:** `parameter packs not expanded with ‘...’`
+- **Fix:** Use gcc-12/g++-12.
 
 ### ❌ Problem 3: CUDA `.cu` files compiled with `g++`
-
-- Fix: Explicitly added:
+- **Fix:** Set `CUDACXX`:
   ```bash
   export CUDACXX=/usr/local/cuda/bin/nvcc
   ```
@@ -50,17 +101,17 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export CUDA_HOME=/usr/local/cuda
 
 cmake .. \
- -DLLAMA_CUDA=on \
- -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc \
- -DCMAKE_C_COMPILER=/usr/bin/gcc-12 \
- -DCMAKE_CXX_COMPILER=/usr/bin/g++-12
+  -DLLAMA_CUDA=on \
+  -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc \
+  -DCMAKE_C_COMPILER=/usr/bin/gcc-12 \
+  -DCMAKE_CXX_COMPILER=/usr/bin/g++-12
 
 make -j8
 ```
 
 ---
 
-## ⚙️ Runtime Environment (in start_llama_server.sh)
+## ⚙️ Runtime Environment (in `start_llama_server.sh`)
 
 ```bash
 export PATH=/usr/local/cuda/bin:$PATH
@@ -68,36 +119,27 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export CUDA_HOME=/usr/local/cuda
 export CUDACXX=/usr/local/cuda/bin/nvcc
 ```
-
-➡️ These are inside the shell script only — not globally in `.bashrc`.
+➡️ These should be set in the shell script, not globally.
 
 ---
 
 ## 🧠 Memory Management
 
 ### ❌ Problem: `cudaMalloc failed: out of memory`
-
-- RTX 4060 = 8 GB VRAM → cannot load all layers
+- RTX 4060 (8 GB VRAM) cannot load all layers.
 
 ### ✅ Fix: Limit GPU layers
-
 ```bash
 -ngl 20
 ```
-
-Tested incrementally with:
-```bash
--ngl 20
--ngl 24
-...
-```
+Test incrementally (e.g., `-ngl 24`, etc.).
 
 ---
 
 ## 📦 Model Used
 
-- `mythomax-l2-13b.Q5_K_M.gguf` from TheBloke (Hugging Face)
-- Placed in: `~/KI/modelle/`
+- `mythomax-l2-13b.Q5_K_M.gguf` from [TheBloke on Hugging Face](https://huggingface.co/TheBloke)
+- Place in: `~/KI/modelle/`
 
 ---
 
@@ -112,8 +154,7 @@ curl http://localhost:11434/v1/completions \
     "max_tokens": 100
   }'
 ```
-
-→ GPU confirmed via `nvidia-smi`
+➡️ Confirm GPU usage with `nvidia-smi`.
 
 ---
 
@@ -122,14 +163,14 @@ curl http://localhost:11434/v1/completions \
 ### ❌ Problem: llama.cpp mode → no connection
 
 ### ✅ Fix:
-- API Type: **OpenAI**
-- API Key: any dummy (`sk-test`)
-- API URL: `http://localhost:11434/v1` (no `/completions` at end)
-- Model name: `mythomax`
+- **API Type:** OpenAI
+- **API Key:** Any dummy (`sk-test`)
+- **API URL:** `http://localhost:11434/v1` (no `/completions` at end)
+- **Model name:** `mythomax`
 
 ---
 
-## 🧞 Bonus: Custom Python CLI
+## 🧑‍💻 Bonus: Custom Python CLI
 
 File: `mythomax_terminal.py`  
 Uses `llama-cpp-python` to prompt interactively from terminal with CUDA.
@@ -162,17 +203,23 @@ KI/
 
 ## ✅ Result
 
-- Fully working llama.cpp server with GPU acceleration
-- API available locally for SillyTavern or curl
-- CUDA toolchain debugged and stable
-- No internet required
+- Fully working llama.cpp server with GPU acceleration.
+- API available locally for SillyTavern or curl.
+- CUDA toolchain debugged and stable.
+- No internet required.
 
 ---
 
-## 📜 License
+## 🤝 Contributing
+
+Contributions and suggestions are welcome! Please open an issue or submit a pull request.
+
+---
+
+## 📄 License
 
 MIT – free to use, adapt, share.
 
 ---
 
-Happy hacking! 🧠
+Happy hacking! 🦠
