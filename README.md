@@ -1,6 +1,8 @@
 # llama.cpp-cuda-setup-popos
 
 🦠 **A complete real-world setup guide for running [llama.cpp](https://github.com/ggerganov/llama.cpp) with CUDA support on Pop!_OS (RTX 4060). Includes troubleshooting, performance tips, and integration with SillyTavern.**
+This project helped me switch to Linux after a Windows crash. Now I’ll never go back.
+
 
 ---
 
