@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "🚀 Starting llama-server with CUDA..."
+
+export PATH=/usr/local/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+export CUDA_HOME=/usr/local/cuda
+export CUDACXX=/usr/local/cuda/bin/nvcc
+
+cd ~/KI/llama-server/llama.cpp/build/bin
+
+./llama-server \
+  -m ~/KI/modelle/mythomax-l2-13b.Q5_K_M.gguf \
+  --host 127.0.0.1 \
+  --port 11434 \
+  -ngl 20 \
+  --ctx-size 4096
